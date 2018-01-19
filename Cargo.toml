@@ -1,0 +1,15 @@
+[package]
+name = "railgun"
+version = "0.1.0"
+authors = ["Julian Laubstein <contact@julianlaubstein.de>"]
+
+[dependencies]
+
+
+[lib]
+name = "railgun_core"
+path = "core/lib.rs"
+
+[[bin]]
+name = "railgun"
+path = "cli/main.rs"
