@@ -4,7 +4,8 @@ version = "0.1.0"
 authors = ["Julian Laubstein <contact@julianlaubstein.de>"]
 
 [dependencies]
-
+pest = "1"
+pest_derive = "1"
 
 [lib]
 name = "railgun_core"
