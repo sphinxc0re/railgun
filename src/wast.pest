@@ -11,9 +11,9 @@ hexdigit = @{
 num = @{ digit ~ ("_"? ~ digit)* }
 hexnum = @{ hexdigit ~ ("_"? ~ hexdigit)* }
 
-unsigned_num = ${ num | "0x" ~ hexnum } // uN
+unsigned_num = @{ num | "0x" ~ hexnum } // uN
 
-signed_num = ${ sign ~ num | sign ~ "0x" ~ hexnum } // sN
+signed_num = @{ sign ~ num | sign ~ "0x" ~ hexnum } // sN
 
 uninterpreted_integer = { unsigned_num | signed_num } // iN
 
@@ -31,8 +31,8 @@ hexfloat = @{
     | hexnum ~ "." ~ hexfrac ~ ("E" | "e") ~ sign ~ num
 }
 
-floating_point_number = { sign ~ floating_point_number_mag } // fN
-floating_point_number_mag = {
+floating_point_number = @{ sign ~ floating_point_number_mag } // fN
+floating_point_number_mag = @{
       float
     | hexfloat
     | "inf"
@@ -49,7 +49,7 @@ stringchar = @{ !("\\" | "\"") ~ any |  "\\t" | "\\n" | "\\r" | "\\\"" | "\\\'" 
 name = { string* }
 
 // Identifiers
-id = ${ "$" ~ idchar+ }
+id = @{ "$" ~ idchar+ }
 idchar = @{
     '0' .. '9'
     | 'a' .. 'z'
