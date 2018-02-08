@@ -320,10 +320,7 @@ labelidx = { unsigned_num | id }
 type_t = { "(" ~ "type" ~ id? ~ functype ~ ")" } // (type)
 
 // Type Uses
-typeuse = {
-      ("(" ~ "type" ~ typeidx ~ params ~ result* ~ ")")
-    | ( params ~ result* )
-}
+typeuse = { ("(" ~ "type" ~ typeidx ~ ")")? ~ params ~ result* }
 
 // Imports
 import = { "(" ~ "import" ~ name ~ name ~ importdesc ~ ")" }
