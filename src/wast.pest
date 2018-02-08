@@ -70,13 +70,14 @@ valtype = { "i32" | "i64" | "f32" | "f64" }
 resulttype = { result? }
 
 // Function types
-functype = { "(" ~ "func" ~ (param* | abbr_param) ~ result* ~ ")" }
-param = { "(" ~ "param" ~ id? ~ valtype ~ ")" }
-abbr_param = { "(" ~ "param" ~ valtype* ~ ")" }
+functype = { "(" ~ "func" ~ params ~ result* ~ ")" }
+params = { param_abbr | param_strict* }
+param_strict = { "(" ~ "param" ~ id? ~ valtype ~ ")" }
+param_abbr = { "(" ~ "param" ~ valtype* ~ ")" }
 result = { "(" ~ "result" ~ valtype ~ ")" }
 
 // Limits
-limits = { unsigned_num | unsigned_num ~ unsigned_num }
+limits = { unsigned_num ~ unsigned_num? }
 
 // Memory Types
 memtype = { limits }
@@ -319,7 +320,10 @@ labelidx = { unsigned_num | id }
 type_t = { "(" ~ "type" ~ id? ~ functype ~ ")" } // (type)
 
 // Type Uses
-typeuse = { "(" ~ "type" ~ typeidx ~ ")" ~ param* ~ result* }
+typeuse = {
+      ("(" ~ "type" ~ typeidx ~ params ~ result* ~ ")")
+    | ( params ~ result* )
+}
 
 // Imports
 import = { "(" ~ "import" ~ name ~ name ~ importdesc ~ ")" }
