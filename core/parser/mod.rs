@@ -26,11 +26,7 @@ mod tests {
 
     #[test]
     fn mem_test() {
-        let inputs = vec![
-            "(memory 23)",
-            "(memory 23 123)",
-            "(memory $testmem 23 123)",
-            ];
+        let inputs = vec!["(memory 23)", "(memory 23 123)", "(memory $testmem 23 123)"];
 
         for input in inputs {
             WastParser::parse(Rule::mem, input.trim()).unwrap_or_else(|e| panic!("{}", e));
