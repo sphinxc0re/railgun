@@ -1,3 +1,3 @@
-use types::value::Value;
+use types::value::ValType;
 
-pub type Block = Option<Value>;
+pub type Block = Option<ValType>;

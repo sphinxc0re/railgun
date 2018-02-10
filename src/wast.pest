@@ -94,7 +94,7 @@ globaltype = { valtype | "(" ~ "mut" ~ valtype ~ ")" }
 
 /// Instructions
 
-instr = { plaininstr | blockinstr }
+instr = { plaininstr | blockinstr | foldedinstr }
 
 // Labels
 label = { id? }
@@ -105,6 +105,15 @@ blockinstr = {
     | "loop" ~ label ~ resulttype ~ instr* ~ "end" ~ id?
     | "if" ~ label ~ resulttype ~ instr* ~ ( "else" ~ id? ~ instr* )? ~ "end" ~ id?
 }
+
+foldedinstr = { blockinstr_folded | plaininstr_folded }
+plaininstr_folded = { "(" ~ plaininstr ~ foldedinstr* ~ ")" }
+blockinstr_folded = {
+      "(" ~ "block" ~ label ~ resulttype ~ instr* ~ id? ~ ")"
+    | "(" ~ "loop" ~ label ~ resulttype ~ instr* ~ id? ~ ")"
+    | "(" ~ "if" ~ label ~ resulttype ~ foldedinstr* ~ "(" ~ "then" ~ id? ~ instr*  ~ ")" ~ ( "(" ~ "else" ~ id? ~ instr*  ~ ")" )? ~ id? ~ ")"
+}
+
 plaininstr = {
       "unreachable"
     | "nop"
@@ -115,6 +124,10 @@ plaininstr = {
     | "call" ~ funcidx
     | "call_indirect" ~ typeuse
 
+    // Parametric Instructions
+    | "select"
+    | "drop"
+
     // Variable Instructions
     | "get_local" ~ localidx
     | "set_local" ~ localidx
@@ -123,29 +136,29 @@ plaininstr = {
     | "set_global" ~ globalidx
 
     // Memory Instructions (I)
+    | "i64.load32_u" ~ memarg
+    | "i64.load32_s" ~ memarg
+    | "i32.load16_u" ~ memarg
+    | "i32.load16_s" ~ memarg
+    | "i64.load16_u" ~ memarg
+    | "i64.load16_s" ~ memarg
+    | "i32.load8_u" ~ memarg
+    | "i32.load8_s" ~ memarg
+    | "i64.load8_u" ~ memarg
+    | "i64.load8_s" ~ memarg
     | "i32.load" ~ memarg
     | "i64.load" ~ memarg
     | "f32.load" ~ memarg
     | "f64.load" ~ memarg
-    | "i32.load8_s" ~ memarg
-    | "i32.load8_u" ~ memarg
-    | "i32.load16_s" ~ memarg
-    | "i32.load16_u" ~ memarg
-    | "i64.load8_s" ~ memarg
-    | "i64.load8_u" ~ memarg
-    | "i64.load16_s" ~ memarg
-    | "i64.load16_u" ~ memarg
-    | "i64.load32_s" ~ memarg
-    | "i64.load32_u" ~ memarg
+    | "i64.store32" ~ memarg
+    | "i64.store16" ~ memarg
+    | "i32.store16" ~ memarg
+    | "i32.store8" ~ memarg
+    | "i64.store8" ~ memarg
     | "i32.store" ~ memarg
     | "i64.store" ~ memarg
     | "f32.store" ~ memarg
     | "f64.store" ~ memarg
-    | "i32.store8" ~ memarg
-    | "i32.store16" ~ memarg
-    | "i64.store8" ~ memarg
-    | "i64.store16" ~ memarg
-    | "i64.store32" ~ memarg
     | "current_memory"
     | "grow_memory"
 
@@ -232,8 +245,8 @@ plaininstr = {
     | "i32.gt_s"
     | "i32.gt_u"
     | "i32.le_s"
-    | "i32.le_s"
-    | "i32.ge_u"
+    | "i32.le_u"
+    | "i32.ge_s"
     | "i32.ge_u"
 
 
@@ -245,8 +258,8 @@ plaininstr = {
     | "i64.gt_s"
     | "i64.gt_u"
     | "i64.le_s"
-    | "i64.le_s"
-    | "i64.ge_u"
+    | "i64.le_u"
+    | "i64.ge_s"
     | "i64.ge_u"
 
     | "f32.eq"
