@@ -70,11 +70,11 @@ valtype = { "i32" | "i64" | "f32" | "f64" }
 resulttype = { result? }
 
 // Function types
-functype = { "(" ~ "func" ~ params ~ result* ~ ")" }
+functype = { opening_brace ~ "func" ~ params ~ result* ~ closing_brace }
 params = { param_abbr | param_strict* }
-param_strict = { "(" ~ "param" ~ id? ~ valtype ~ ")" }
-param_abbr = { "(" ~ "param" ~ valtype* ~ ")" }
-result = { "(" ~ "result" ~ valtype ~ ")" }
+param_strict = { opening_brace ~ "param" ~ id? ~ valtype ~ closing_brace }
+param_abbr = { opening_brace ~ "param" ~ valtype* ~ closing_brace }
+result = { opening_brace ~ "result" ~ valtype ~ closing_brace }
 
 // Limits
 limits = { unsigned_num ~ unsigned_num? }
@@ -87,14 +87,14 @@ tabletype = { limits ~ elemtype }
 elemtype = { "anyfunc" }
 
 // Global Types
-globaltype = { valtype | "(" ~ "mut" ~ valtype ~ ")" }
+globaltype = { valtype | opening_brace ~ "mut" ~ valtype ~ closing_brace }
 
 
 
 
 /// Instructions
 
-instr = { plaininstr | blockinstr }
+instr = { plaininstr | blockinstr | foldedinstr }
 
 // Labels
 label = { id? }
@@ -105,6 +105,15 @@ blockinstr = {
     | "loop" ~ label ~ resulttype ~ instr* ~ "end" ~ id?
     | "if" ~ label ~ resulttype ~ instr* ~ ( "else" ~ id? ~ instr* )? ~ "end" ~ id?
 }
+
+foldedinstr = { blockinstr_folded | plaininstr_folded }
+plaininstr_folded = { opening_brace ~ plaininstr ~ foldedinstr* ~ closing_brace }
+blockinstr_folded = {
+      opening_brace ~ "block" ~ label ~ resulttype ~ instr* ~ id? ~ closing_brace
+    | opening_brace ~ "loop" ~ label ~ resulttype ~ instr* ~ id? ~ closing_brace
+    | opening_brace ~ "if" ~ label ~ resulttype ~ foldedinstr* ~ opening_brace ~ "then" ~ id? ~ instr*  ~ closing_brace ~ ( opening_brace ~ "else" ~ id? ~ instr*  ~ closing_brace )? ~ id? ~ closing_brace
+}
+
 plaininstr = {
       "unreachable"
     | "nop"
@@ -115,6 +124,10 @@ plaininstr = {
     | "call" ~ funcidx
     | "call_indirect" ~ typeuse
 
+    // Parametric Instructions
+    | "select"
+    | "drop"
+
     // Variable Instructions
     | "get_local" ~ localidx
     | "set_local" ~ localidx
@@ -123,29 +136,29 @@ plaininstr = {
     | "set_global" ~ globalidx
 
     // Memory Instructions (I)
+    | "i64.load32_u" ~ memarg
+    | "i64.load32_s" ~ memarg
+    | "i32.load16_u" ~ memarg
+    | "i32.load16_s" ~ memarg
+    | "i64.load16_u" ~ memarg
+    | "i64.load16_s" ~ memarg
+    | "i32.load8_u" ~ memarg
+    | "i32.load8_s" ~ memarg
+    | "i64.load8_u" ~ memarg
+    | "i64.load8_s" ~ memarg
     | "i32.load" ~ memarg
     | "i64.load" ~ memarg
     | "f32.load" ~ memarg
     | "f64.load" ~ memarg
-    | "i32.load8_s" ~ memarg
-    | "i32.load8_u" ~ memarg
-    | "i32.load16_s" ~ memarg
-    | "i32.load16_u" ~ memarg
-    | "i64.load8_s" ~ memarg
-    | "i64.load8_u" ~ memarg
-    | "i64.load16_s" ~ memarg
-    | "i64.load16_u" ~ memarg
-    | "i64.load32_s" ~ memarg
-    | "i64.load32_u" ~ memarg
+    | "i64.store32" ~ memarg
+    | "i64.store16" ~ memarg
+    | "i32.store16" ~ memarg
+    | "i32.store8" ~ memarg
+    | "i64.store8" ~ memarg
     | "i32.store" ~ memarg
     | "i64.store" ~ memarg
     | "f32.store" ~ memarg
     | "f64.store" ~ memarg
-    | "i32.store8" ~ memarg
-    | "i32.store16" ~ memarg
-    | "i64.store8" ~ memarg
-    | "i64.store16" ~ memarg
-    | "i64.store32" ~ memarg
     | "current_memory"
     | "grow_memory"
 
@@ -232,8 +245,8 @@ plaininstr = {
     | "i32.gt_s"
     | "i32.gt_u"
     | "i32.le_s"
-    | "i32.le_s"
-    | "i32.ge_u"
+    | "i32.le_u"
+    | "i32.ge_s"
     | "i32.ge_u"
 
 
@@ -245,8 +258,8 @@ plaininstr = {
     | "i64.gt_s"
     | "i64.gt_u"
     | "i64.le_s"
-    | "i64.le_s"
-    | "i64.ge_u"
+    | "i64.le_u"
+    | "i64.ge_s"
     | "i64.ge_u"
 
     | "f32.eq"
@@ -317,58 +330,58 @@ localidx = { unsigned_num | id }
 labelidx = { unsigned_num | id }
 
 // Types
-type_t = { "(" ~ "type" ~ id? ~ functype ~ ")" } // (type)
+type_t = { opening_brace ~ "type" ~ id? ~ functype ~ closing_brace } // (type)
 
 // Type Uses
-typeuse = { ("(" ~ "type" ~ typeidx ~ ")")? ~ params ~ result* }
+typeuse = { (opening_brace ~ "type" ~ typeidx ~ closing_brace)? ~ params ~ result* }
 
 // Imports
-import = { "(" ~ "import" ~ name ~ name ~ importdesc ~ ")" }
+import = { opening_brace ~ "import" ~ name ~ name ~ importdesc ~ closing_brace }
 importdesc = {
-      "(" ~ "func" ~ id? ~ typeuse ~ ")"
-    | "(" ~ "table" ~ id? ~ tabletype ~ ")"
-    | "(" ~ "memory" ~ id? ~ memtype ~ ")"
-    | "(" ~ "global" ~ id? ~ globaltype ~ ")"
+      opening_brace ~ "func" ~ id? ~ typeuse ~ closing_brace
+    | opening_brace ~ "table" ~ id? ~ tabletype ~ closing_brace
+    | opening_brace ~ "memory" ~ id? ~ memtype ~ closing_brace
+    | opening_brace ~ "global" ~ id? ~ globaltype ~ closing_brace
 }
 
 // Functions
-func = { "(" ~ "func" ~ id? ~ typeuse ~ local* ~ instr* ~ ")" }
-local = { "(" ~ "local" ~ id? ~ valtype ~ ")" }
+func = { opening_brace ~ "func" ~ id? ~ typeuse ~ local* ~ instr* ~ closing_brace }
+local = { opening_brace ~ "local" ~ id? ~ valtype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-func-abbrev
 
 // Tables
-table = { "(" ~ "table" ~ id? ~ tabletype ~ ")" }
+table = { opening_brace ~ "table" ~ id? ~ tabletype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-table-abbrev
 
 // Memories
-mem = { "(" ~ "memory" ~ id? ~ memtype ~ ")" }
+mem = { opening_brace ~ "memory" ~ id? ~ memtype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-mem-abbrev
 
 // Globals
-global = { "(" ~ "global" ~ id? ~ globaltype ~ ")" }
+global = { opening_brace ~ "global" ~ id? ~ globaltype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-global-abbrev
 
 // Exports
-export = { "(" ~ "export" ~ name ~ exportdesc ~ ")" }
+export = { opening_brace ~ "export" ~ name ~ exportdesc ~ closing_brace }
 exportdesc = {
-      "(" ~ "func" ~ funcidx ~ ")"
-    | "(" ~ "table" ~ tableidx ~ ")"
-    | "(" ~ "memory" ~ memidx ~ ")"
-    | "(" ~ "global" ~ globalidx ~ ")"
+      opening_brace ~ "func" ~ funcidx ~ closing_brace
+    | opening_brace ~ "table" ~ tableidx ~ closing_brace
+    | opening_brace ~ "memory" ~ memidx ~ closing_brace
+    | opening_brace ~ "global" ~ globalidx ~ closing_brace
 }
 
 // Start Function
-start = { "(" ~ "start" ~ funcidx ~ ")" }
+start = { opening_brace ~ "start" ~ funcidx ~ closing_brace }
 
 // Element Segments
-elem = { "(" ~ "elem" ~ tableidx? ~ "(" ~ "offset" ~ expr ~ ")" ~ funcidx* ~ ")" }
+elem = { opening_brace ~ "elem" ~ tableidx? ~ opening_brace ~ "offset" ~ expr ~ closing_brace ~ funcidx* ~ closing_brace }
 
 // Data Segments
-data = { "(" ~ "data" ~ memidx? ~ "(" ~ "offset" ~ expr ~ ")" ~ datastring* ~ ")" }
+data = { opening_brace ~ "data" ~ memidx? ~ opening_brace ~ "offset" ~ expr ~ closing_brace ~ datastring* ~ closing_brace }
 datastring = { string*}
 
 // Modules
-module = { "(" ~ "module" ~ id? ~ modulefield* ~ ")" }
+module = { opening_brace ~ "module" ~ id? ~ modulefield* ~ closing_brace }
 modulefield = {
       type_t
     | import
@@ -383,6 +396,9 @@ modulefield = {
 }
 
 /// Misc
+opening_brace = _{ "(" }
+closing_brace = _{ ")" }
+
 newline = _{ "\n" | "\r\n" }
 whitespace = _{ " " | "\t" | newline }
 file = { soi ~ module* ~ eoi }

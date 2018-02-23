@@ -18,6 +18,13 @@ mod tests {
     }
 
     #[test]
+    fn hello_world_parser() {
+        let input = include_str!("testfiles/hello_world.wast");
+
+        WastParser::parse(Rule::file, input.trim()).unwrap_or_else(|e| panic!("{}", e));
+    }
+
+    #[test]
     fn fission_test() {
         let input = include_str!("testfiles/fission.wast");
 

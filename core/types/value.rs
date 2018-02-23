@@ -1,4 +1,4 @@
-pub enum Value {
+pub enum ValType {
     I32,
     I64,
     F32,
