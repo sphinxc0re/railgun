@@ -70,11 +70,11 @@ valtype = { "i32" | "i64" | "f32" | "f64" }
 resulttype = { result? }
 
 // Function types
-functype = { o_brace ~ "func" ~ params ~ result* ~ c_brace }
+functype = { opening_brace ~ "func" ~ params ~ result* ~ closing_brace }
 params = { param_abbr | param_strict* }
-param_strict = { o_brace ~ "param" ~ id? ~ valtype ~ c_brace }
-param_abbr = { o_brace ~ "param" ~ valtype* ~ c_brace }
-result = { o_brace ~ "result" ~ valtype ~ c_brace }
+param_strict = { opening_brace ~ "param" ~ id? ~ valtype ~ closing_brace }
+param_abbr = { opening_brace ~ "param" ~ valtype* ~ closing_brace }
+result = { opening_brace ~ "result" ~ valtype ~ closing_brace }
 
 // Limits
 limits = { unsigned_num ~ unsigned_num? }
@@ -87,7 +87,7 @@ tabletype = { limits ~ elemtype }
 elemtype = { "anyfunc" }
 
 // Global Types
-globaltype = { valtype | o_brace ~ "mut" ~ valtype ~ c_brace }
+globaltype = { valtype | opening_brace ~ "mut" ~ valtype ~ closing_brace }
 
 
 
@@ -107,11 +107,11 @@ blockinstr = {
 }
 
 foldedinstr = { blockinstr_folded | plaininstr_folded }
-plaininstr_folded = { o_brace ~ plaininstr ~ foldedinstr* ~ c_brace }
+plaininstr_folded = { opening_brace ~ plaininstr ~ foldedinstr* ~ closing_brace }
 blockinstr_folded = {
-      o_brace ~ "block" ~ label ~ resulttype ~ instr* ~ id? ~ c_brace
-    | o_brace ~ "loop" ~ label ~ resulttype ~ instr* ~ id? ~ c_brace
-    | o_brace ~ "if" ~ label ~ resulttype ~ foldedinstr* ~ o_brace ~ "then" ~ id? ~ instr*  ~ c_brace ~ ( o_brace ~ "else" ~ id? ~ instr*  ~ c_brace )? ~ id? ~ c_brace
+      opening_brace ~ "block" ~ label ~ resulttype ~ instr* ~ id? ~ closing_brace
+    | opening_brace ~ "loop" ~ label ~ resulttype ~ instr* ~ id? ~ closing_brace
+    | opening_brace ~ "if" ~ label ~ resulttype ~ foldedinstr* ~ opening_brace ~ "then" ~ id? ~ instr*  ~ closing_brace ~ ( opening_brace ~ "else" ~ id? ~ instr*  ~ closing_brace )? ~ id? ~ closing_brace
 }
 
 plaininstr = {
@@ -330,58 +330,58 @@ localidx = { unsigned_num | id }
 labelidx = { unsigned_num | id }
 
 // Types
-type_t = { o_brace ~ "type" ~ id? ~ functype ~ c_brace } // (type)
+type_t = { opening_brace ~ "type" ~ id? ~ functype ~ closing_brace } // (type)
 
 // Type Uses
-typeuse = { (o_brace ~ "type" ~ typeidx ~ c_brace)? ~ params ~ result* }
+typeuse = { (opening_brace ~ "type" ~ typeidx ~ closing_brace)? ~ params ~ result* }
 
 // Imports
-import = { o_brace ~ "import" ~ name ~ name ~ importdesc ~ c_brace }
+import = { opening_brace ~ "import" ~ name ~ name ~ importdesc ~ closing_brace }
 importdesc = {
-      o_brace ~ "func" ~ id? ~ typeuse ~ c_brace
-    | o_brace ~ "table" ~ id? ~ tabletype ~ c_brace
-    | o_brace ~ "memory" ~ id? ~ memtype ~ c_brace
-    | o_brace ~ "global" ~ id? ~ globaltype ~ c_brace
+      opening_brace ~ "func" ~ id? ~ typeuse ~ closing_brace
+    | opening_brace ~ "table" ~ id? ~ tabletype ~ closing_brace
+    | opening_brace ~ "memory" ~ id? ~ memtype ~ closing_brace
+    | opening_brace ~ "global" ~ id? ~ globaltype ~ closing_brace
 }
 
 // Functions
-func = { o_brace ~ "func" ~ id? ~ typeuse ~ local* ~ instr* ~ c_brace }
-local = { o_brace ~ "local" ~ id? ~ valtype ~ c_brace }
+func = { opening_brace ~ "func" ~ id? ~ typeuse ~ local* ~ instr* ~ closing_brace }
+local = { opening_brace ~ "local" ~ id? ~ valtype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-func-abbrev
 
 // Tables
-table = { o_brace ~ "table" ~ id? ~ tabletype ~ c_brace }
+table = { opening_brace ~ "table" ~ id? ~ tabletype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-table-abbrev
 
 // Memories
-mem = { o_brace ~ "memory" ~ id? ~ memtype ~ c_brace }
+mem = { opening_brace ~ "memory" ~ id? ~ memtype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-mem-abbrev
 
 // Globals
-global = { o_brace ~ "global" ~ id? ~ globaltype ~ c_brace }
+global = { opening_brace ~ "global" ~ id? ~ globaltype ~ closing_brace }
 // TODO: Implement: https://webassembly.github.io/spec/core/text/modules.html#text-global-abbrev
 
 // Exports
-export = { o_brace ~ "export" ~ name ~ exportdesc ~ c_brace }
+export = { opening_brace ~ "export" ~ name ~ exportdesc ~ closing_brace }
 exportdesc = {
-      o_brace ~ "func" ~ funcidx ~ c_brace
-    | o_brace ~ "table" ~ tableidx ~ c_brace
-    | o_brace ~ "memory" ~ memidx ~ c_brace
-    | o_brace ~ "global" ~ globalidx ~ c_brace
+      opening_brace ~ "func" ~ funcidx ~ closing_brace
+    | opening_brace ~ "table" ~ tableidx ~ closing_brace
+    | opening_brace ~ "memory" ~ memidx ~ closing_brace
+    | opening_brace ~ "global" ~ globalidx ~ closing_brace
 }
 
 // Start Function
-start = { o_brace ~ "start" ~ funcidx ~ c_brace }
+start = { opening_brace ~ "start" ~ funcidx ~ closing_brace }
 
 // Element Segments
-elem = { o_brace ~ "elem" ~ tableidx? ~ o_brace ~ "offset" ~ expr ~ c_brace ~ funcidx* ~ c_brace }
+elem = { opening_brace ~ "elem" ~ tableidx? ~ opening_brace ~ "offset" ~ expr ~ closing_brace ~ funcidx* ~ closing_brace }
 
 // Data Segments
-data = { o_brace ~ "data" ~ memidx? ~ o_brace ~ "offset" ~ expr ~ c_brace ~ datastring* ~ c_brace }
+data = { opening_brace ~ "data" ~ memidx? ~ opening_brace ~ "offset" ~ expr ~ closing_brace ~ datastring* ~ closing_brace }
 datastring = { string*}
 
 // Modules
-module = { o_brace ~ "module" ~ id? ~ modulefield* ~ c_brace }
+module = { opening_brace ~ "module" ~ id? ~ modulefield* ~ closing_brace }
 modulefield = {
       type_t
     | import
@@ -396,8 +396,8 @@ modulefield = {
 }
 
 /// Misc
-o_brace = _{ "(" }
-c_brace = _{ ")" }
+opening_brace = _{ "(" }
+closing_brace = _{ ")" }
 
 newline = _{ "\n" | "\r\n" }
 whitespace = _{ " " | "\t" | newline }
